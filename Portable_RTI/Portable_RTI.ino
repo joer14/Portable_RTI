@@ -9,6 +9,22 @@
 // 3.5mm Female jack is used as an on/off switch and as an input for the hotshoe
 // Contact joer14@gmail.com if you have any questions. 
 
+///////////////////
+//////Options/////
+/////////////////
+
+int lightDuration = 50;
+// How long do you want the LEDs to be on for, measured in milliseconds 
+// T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
+// however we also add debouncing time in the main loop, so look out for that. 
+
+// Ring Flash Mode
+// 1 => fire all of the lights on the first photo (total of 11 photos)
+// 0 => 1 LED per photo, 10 photos. 
+int ringFlashFirst = 1;
+
+
+
 int latchPin = 11;
 int clockPin = 10;
 int dataPin = 12;
@@ -16,9 +32,7 @@ const int HotShoe_Pin = 9;
 const int buttonPin = 8;
 int count = 1;
 const int LED_Pin = 13;
-int lightDuration = 50;
 
-//add option for ring flash also
 
 void setup() {
   pinMode(latchPin, OUTPUT);
@@ -32,6 +46,10 @@ void setup() {
   //Zero everything so you don't have any lights stuck on. 
   //
   dip(0,0);
+  
+  if(ringFlashFirst){
+    count=0;
+  }
 }
 
 
@@ -62,11 +80,11 @@ void loop() {
    // but really could use a loop, bit shifting,
    // any number of more elegant solutions. 
    
-   
    switch (count) {
     //display zero
     case 0:
-      dipDelay(0,0,lightDuration);
+      dipDelay(255,255,50);
+      delay(200);
     break;
     case 1:
       dipDelay(1,0,lightDuration);
@@ -105,9 +123,11 @@ void loop() {
   if (count<11) {
     count=count++;
   }
+  //debounce delay 
+  //50 ms delay for debouncing. might not be necessary. 
   delay(50);
   
-  if(count ==11) count=1;
-  
+  //if count ==11 and ring flash first, then count = 0;
+  if(count == 11) count = (ringFlashFirst) ? 0 : 1;
  };
 }
