@@ -1,8 +1,8 @@
 Portable_RTI
 ============
 
-Code for a portable RTI Project, Arduino, Photography
+Code for a portable RTI Project. 
 
-Email Joe at joer14@gmail.com for more info. 
+Email me at joer14@gmail.com with any questions, comments, thoughts :)  
 
 Photos, more info: [Photos](https://imgur.com/a/AzWaE)
