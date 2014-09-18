@@ -13,7 +13,7 @@
 //////Options/////
 /////////////////
 
-int lightDuration = 50;
+int lightDuration = 75;
 // How long do you want the LEDs to be on for, measured in milliseconds 
 // T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
 // however we also add debouncing time in the main loop, so look out for that. 
