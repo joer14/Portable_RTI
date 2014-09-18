@@ -81,9 +81,9 @@ void loop() {
    // any number of more elegant solutions. 
    
    switch (count) {
-    //display zero
+    
     case 0:
-      dipDelay(255,255,50);
+      dipDelay(0,2,lightDuration);
       delay(200);
     break;
     case 1:
@@ -114,7 +114,8 @@ void loop() {
       dipDelay(0,1,100);
       break;
     case 10:
-      dipDelay(0,2,lightDuration);
+      dipDelay(255,255,50);
+
       break;
     
     default: 
