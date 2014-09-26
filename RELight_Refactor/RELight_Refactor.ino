@@ -107,7 +107,7 @@ void doubleShiftOut(int val, int val2){
 };
 
 void dipDelay( int val, int val2, int delayTime){
-  int upFrontDelay = 10;
+  int upFrontDelay = 0;
   delay(upFrontDelay);
   doubleShiftOut(val, val2);
   delay(delayTime);
@@ -129,7 +129,8 @@ void setRing(int LEDstate){
    switch (LEDstate) {
     case 0:
       //startIt = 0;
-      dipDelay(0,2,lightDuration);
+      //dipDelay(0,2,lightDuration);
+      dipDelay(31,255,lightDuration);
       //digitalWrite(shutter_Release,HIGH);
       break;
     case 1:
@@ -191,23 +192,82 @@ void shootSequence(){
   //delay(500);
   int cases = 11;
   
+  unsigned long initialTime = millis();
+  unsigned long CMA = 0;  // current Cummulative Moving Average (elapsed time between captures) 
+  unsigned long CMAn1 = 0; // n+1 cummulative Moving Average
+  unsigned long Xn1 = 0;   // most recent delay
+  unsigned long n = 0;     // current state, ranges from 0 to 10;
+  unsigned long currentExpectedTermination = (11*CMAn1) + initialTime; // when should the sequency be done shooting
+  unsigned long stopShutterTime = (10.5*CMAn1) + initialTime; // when should the sequency be done shooting
+  unsigned long now;
+  unsigned long previous;
+  
   digitalWrite(shutter_Release,HIGH);
-  delay(200);   
+  //setRing(0);
+  //delay(150);   
   count = 0;
   
   while(count< cases){
-    setRing(count);
+    previous = millis();
     int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
     while(!hotShoeHigh){
       hotShoeHigh = !digitalRead(hotShoe_Input); 
     }
+    setRing(count);
+    now = millis();
+    Xn1 = now - previous;
+    CMA = (Xn1+(count*CMA))/(count+1);
+    stopShutterTime = (10.5*CMA) + initialTime; // when should the sequency be done shooting
+  
     count = count++;
-    if (count==(cases-1)) digitalWrite(shutter_Release,LOW);
-     
+    if ( now > stopShutterTime) digitalWrite(shutter_Release,LOW);
+    //if (count==(cases)) digitalWrite(shutter_Release,LOW);
+    Serial.println(Xn1);
   }
   
   count=0;
 }
+
+//void shootSequence(){
+//  //Serial.println("State: Shooting Sequence");
+//  //delay(500);
+//  int cases = 11;
+//  
+//  unsigned long initialTime = millis();
+//  unsigned long CMA = 0;  // current Cummulative Moving Average (elapsed time between captures) 
+//  unsigned long CMAn1 = 0; // n+1 cummulative Moving Average
+//  unsigned long Xn1 = 0;   // most recent delay
+//  unsigned long n = 0;     // current state, ranges from 0 to 10;
+//  unsigned long currentExpectedTermination = (11*CMAn1) + initialTime; // when should the sequency be done shooting
+//  unsigned long stopShutterTime = (10.5*CMAn1) + initialTime; // when should the sequency be done shooting
+//  unsigned long now;
+//  unsigned long previous;
+//  
+//  digitalWrite(shutter_Release,HIGH);
+//  //setRing(0);
+//  delay(150);   
+//  count = 0;
+//  
+//  while(count< cases){
+//    previous = millis();
+//    setRing(count);
+//    int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
+//    while(!hotShoeHigh){
+//      hotShoeHigh = !digitalRead(hotShoe_Input); 
+//    }
+//    now = millis();
+//    Xn1 = now - previous;
+//    CMA = (Xn1+(count*CMA))/(count+1);
+//    stopShutterTime = (10.5*CMA) + initialTime; // when should the sequency be done shooting
+//  
+//    count = count++;
+//    if ( now > stopShutterTime) digitalWrite(shutter_Release,LOW);
+//    //if (count==(cases)) digitalWrite(shutter_Release,LOW);
+//    Serial.println(Xn1);
+//  }
+//  
+//  count=0;
+//}
 
 /////////////////////////////////////////////////////////////////////
 ////////////  Blinks the Diagnostic LED for 2 seconds //////////////
@@ -266,66 +326,6 @@ void loop() {
   //oneShot();
   //dipDelay(255,255,lightDuration);
 //}else Serial.println("button Input: LOW");
-
-
-
-
-// //wait until the hotshoe triggers or the button is pushed
-// // ---- add functionality for detecting remote trigger
-// //
-//
-// //if remote or button pressed start counting;
-////if(digitalRead(button_Input)==HIGH || digitalRead(remote_Input)==LOW ) {
-////  delay(50);
-////  if(digitalRead(remote_Input)==LOW) startIt = 1;
-////}
-//if(digitalRead(button_Input)==HIGH) {
-//  delay(50);
-//  if(digitalRead(button_Input)==HIGH) startIt = 1;
-//}
-//
-//// if( digitalRead(remote_Input)==HIGH ) {
-////   startIt = 1;
-//// }else startIt = 0;
-// // if (count = 0 and remote or button pressed) or hotshoe triggered (regardless of count), start it or keep going
-// // while(digitalRead(hotShoe_Input)==LOW || startIt&&(count==0)){
-// // while(digitalRead(button_Input)==HIGH ||digitalRead(hotShoe_Input)==LOW){
-// 
-// digitalWrite(diagnostic_LED, startIt);
-// 
-// while(digitalRead(hotShoe_Input)==LOW || startIt){
-//   
-// //while(digitalRead(hotShoe_Input)==LOW || digitalRead(button_Input)==HIGH){
-// //  digitalWrite(diagnostic_LED, startIt);
-//  runIt(count);
-//  if (count<11) {
-//    // keep triggering the shutter
-//    if(count<10) {
-//      digitalWrite(shutter_Release,HIGH);
-//    }else digitalWrite(shutter_Release,LOW);
-//    // this will force the shutter to go off, thus force the flash to fire
-//    // thus we will re-enter this loop
-//    count=count++;
-//  }
-//  // else if at end of sequence and ring flash first, then count = 0
-//  // also turn off shutter_release and wait 2 seconds
-//  // blink LED for 2 Seconds
-//  //
-//  else if (count == 11) {
-//    count = 0;
-//    digitalWrite(shutter_Release,LOW);
-//    startIt = 0;
-//    //flash LED/stall for 2 seconds
-//    digitalWrite(diagnostic_LED,HIGH);
-//    delay(500);
-//    digitalWrite(diagnostic_LED,LOW);
-//    delay(500);
-//    digitalWrite(diagnostic_LED,HIGH);
-//    delay(500);
-//    digitalWrite(diagnostic_LED,LOW);
-//    delay(500);
-//  }
-// }
 
 
 
