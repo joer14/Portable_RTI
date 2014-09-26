@@ -16,7 +16,7 @@
 //////Options/////
 /////////////////
 
-int lightDuration = 75;
+int lightDuration = 10;
 // How long do you want the LEDs to be on for, measured in milliseconds
 // T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
 // however we also add debouncing time in the main loop, so look out for that.
@@ -42,10 +42,10 @@ const int diagnostic_LED = 13;
 // input for the remote control (2.5mm jack)
 // optional - can trigger simply using button or actual camera shutter
 
-const int remote_Input;
+const int remote_Input = 6;
 
 //Output - shutter release output (3.5mm to 2.5mm)
-const int shutter_Release;
+const int shutter_Release = 7;
 
 
 void setup() {
@@ -65,7 +65,14 @@ void setup() {
 
   if(ringFlashFirst){
     count=0;
-  }
+  };
+  digitalWrite(shutter_Release,LOW);
+  
+  delay(1000);
+  digitalWrite(shutter_Release,HIGH);
+  delay(1000);
+  digitalWrite(shutter_Release,LOW);
+   
 }
 
 
@@ -82,28 +89,24 @@ void dip(int val, int val2){
 
 void dipDelay( int val, int val2, int delayTime){
   dip(val, val2);
-  delay(delayTime);
+  delay(1);
+//  delay(delayTime);
   dip(0,0);
+  delay(185);
 };
 
-
-void loop() {
-
- //wait until the hotshoe triggers or the button is pushed
- // ---- add functionality for detecting remote trigger
- //
-
- //if remote or button pressed start counting;
- if(digitalRead(button_Input)==HIGH || digitalRead(remote_Input)==HIGH ) startIt = 1;
-
- // if (count = 0 and remote or button pressed) or hotshoe triggered (regardless of count), start it or keep going
- while(digitalRead(hotShoe_Input)==LOW || startIt&&(count==0)){
+void runIt(int cc){
 
    switch (count) {
     case 0:
-      dipDelay(255,255,lightDuration);
+      //startIt = 0;
+      dipDelay(0,2,lightDuration);
+      
+      digitalWrite(shutter_Release,HIGH);
+      
       break;
     case 1:
+      digitalWrite(shutter_Release,HIGH);
       dipDelay(1,0,lightDuration);
       break;
     case 2:
@@ -128,17 +131,53 @@ void loop() {
       dipDelay(128,0,lightDuration);
       break;
     case 9:
+      digitalWrite(diagnostic_LED,LOW);
+      
       dipDelay(0,1,lightDuration);
       break;
     case 10:
-      dipDelay(0,2,lightDuration);
+      digitalWrite(diagnostic_LED,LOW);
+      dipDelay(255,255,lightDuration);
       break;
     default:
       dipDelay(0,0,lightDuration);
-  }
+  };
+};
+void loop() {
+
+ //wait until the hotshoe triggers or the button is pushed
+ // ---- add functionality for detecting remote trigger
+ //
+
+ //if remote or button pressed start counting;
+//if(digitalRead(button_Input)==HIGH || digitalRead(remote_Input)==LOW ) {
+//  delay(50);
+//  if(digitalRead(remote_Input)==LOW) startIt = 1;
+//}
+if(digitalRead(button_Input)==HIGH) {
+  delay(50);
+  if(digitalRead(button_Input)==HIGH) startIt = 1;
+}
+
+// if( digitalRead(remote_Input)==HIGH ) {
+//   startIt = 1;
+// }else startIt = 0;
+ // if (count = 0 and remote or button pressed) or hotshoe triggered (regardless of count), start it or keep going
+ // while(digitalRead(hotShoe_Input)==LOW || startIt&&(count==0)){
+ // while(digitalRead(button_Input)==HIGH ||digitalRead(hotShoe_Input)==LOW){
+ 
+ digitalWrite(diagnostic_LED, startIt);
+ 
+ while(digitalRead(hotShoe_Input)==LOW || startIt){
+   
+ //while(digitalRead(hotShoe_Input)==LOW || digitalRead(button_Input)==HIGH){
+ //  digitalWrite(diagnostic_LED, startIt);
+  runIt(count);
   if (count<11) {
     // keep triggering the shutter
-    shutter_Release = HIGH;
+    if(count<10) {
+      digitalWrite(shutter_Release,HIGH);
+    }else digitalWrite(shutter_Release,LOW);
     // this will force the shutter to go off, thus force the flash to fire
     // thus we will re-enter this loop
     count=count++;
@@ -148,20 +187,20 @@ void loop() {
   // blink LED for 2 Seconds
   //
   else if (count == 11) {
-    count = (ringFlashFirst) ? 0 : 1;
-    shutter_Release = LOW;
+    count = 0;
+    digitalWrite(shutter_Release,LOW);
     startIt = 0;
     //flash LED/stall for 2 seconds
-    Diagnostic_LED = HIGH;
+    digitalWrite(diagnostic_LED,HIGH);
     delay(500);
-    Diagnostic_LED = LOW;
+    digitalWrite(diagnostic_LED,LOW);
     delay(500);
-    Diagnostic_LED = HIGH;
+    digitalWrite(diagnostic_LED,HIGH);
     delay(500);
-    Diagnostic_LED = LOW;
+    digitalWrite(diagnostic_LED,LOW);
     delay(500);
   }
-
+ }
 
 
 }
