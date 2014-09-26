@@ -17,7 +17,7 @@
 /////////////////
 
 int serialDebug = 1;      //
-int lightDuration = 5;   //amount of time the light is on for in ms
+int lightDuration = 75;   //amount of time the light is on for in ms
 int exposureLength = 190; //exposure length in ms - hopefully won't hardcode this in the end
 // T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
 // however we also add debouncing time in the main loop, so look out for that.
@@ -77,7 +77,7 @@ void setup() {
   
   digitalWrite(shutter_Release,LOW);
   
-  Serial.begin(9600);
+  if(serialDebug) Serial.begin(9600);
   //while (!Serial) {
   //  ; // wait for serial port to connect. Needed for Leonardo only
   //}
@@ -125,16 +125,13 @@ void dipDelay( int val, int val2, int delayTime){
 ///////////////////////////////////////////////////////
 
 void setRing(int LEDstate){
-
    switch (LEDstate) {
     case 0:
-      //startIt = 0;
       //dipDelay(0,2,lightDuration);
-      dipDelay(31,255,lightDuration);
-      //digitalWrite(shutter_Release,HIGH);
+      // Useful to display alt light 1 for debugging
+      //dipDelay(31,255,lightDuration);
       break;
     case 1:
-      //digitalWrite(shutter_Release,HIGH);
       dipDelay(1,0,lightDuration);
       break;
     case 2:
@@ -174,7 +171,7 @@ void setRing(int LEDstate){
 ///// and tests the camera/ring light for exposure settings
 /////////////////////////////////////////////////////////////////////
 void oneShot(){
-  Serial.println("State: One Shot"); 
+  if(serialDebug) Serial.println("State: One Shot"); 
   setRing(0);//turn all LEDs on
   //delay(2000);// just for debugging
 }
@@ -188,7 +185,7 @@ void oneShot(){
 
 
 void shootSequence(){
-  //Serial.println("State: Shooting Sequence");
+  //if(serialDebug) Serial.println("State: Shooting Sequence");
   //delay(500);
   int cases = 11;
   
@@ -222,59 +219,19 @@ void shootSequence(){
     count = count++;
     if ( now > stopShutterTime) digitalWrite(shutter_Release,LOW);
     //if (count==(cases)) digitalWrite(shutter_Release,LOW);
-    Serial.println(Xn1);
+    if(serialDebug) Serial.println(Xn1);
   }
   
   count=0;
 }
 
-//void shootSequence(){
-//  //Serial.println("State: Shooting Sequence");
-//  //delay(500);
-//  int cases = 11;
-//  
-//  unsigned long initialTime = millis();
-//  unsigned long CMA = 0;  // current Cummulative Moving Average (elapsed time between captures) 
-//  unsigned long CMAn1 = 0; // n+1 cummulative Moving Average
-//  unsigned long Xn1 = 0;   // most recent delay
-//  unsigned long n = 0;     // current state, ranges from 0 to 10;
-//  unsigned long currentExpectedTermination = (11*CMAn1) + initialTime; // when should the sequency be done shooting
-//  unsigned long stopShutterTime = (10.5*CMAn1) + initialTime; // when should the sequency be done shooting
-//  unsigned long now;
-//  unsigned long previous;
-//  
-//  digitalWrite(shutter_Release,HIGH);
-//  //setRing(0);
-//  delay(150);   
-//  count = 0;
-//  
-//  while(count< cases){
-//    previous = millis();
-//    setRing(count);
-//    int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
-//    while(!hotShoeHigh){
-//      hotShoeHigh = !digitalRead(hotShoe_Input); 
-//    }
-//    now = millis();
-//    Xn1 = now - previous;
-//    CMA = (Xn1+(count*CMA))/(count+1);
-//    stopShutterTime = (10.5*CMA) + initialTime; // when should the sequency be done shooting
-//  
-//    count = count++;
-//    if ( now > stopShutterTime) digitalWrite(shutter_Release,LOW);
-//    //if (count==(cases)) digitalWrite(shutter_Release,LOW);
-//    Serial.println(Xn1);
-//  }
-//  
-//  count=0;
-//}
 
 /////////////////////////////////////////////////////////////////////
 ////////////  Blinks the Diagnostic LED for 2 seconds //////////////
 /////////////////////////////////////////////////////////////////////
 
 void coolDown(int secs){
-  Serial.println("State: Cooling Down");
+  if(serialDebug) Serial.println("State: Cooling Down");
   doubleShiftOut(0,0);                  //clear Display just in case it isn't
   int numFlashes = (secs*1000)/250;
   int i;
@@ -289,7 +246,7 @@ void coolDown(int secs){
 
 void loop() {
   
-  //Serial.println("State: Idle"); 
+  //if(serialDebug) Serial.println("State: Idle"); 
   
   int remoteHigh  = !digitalRead(remote_Input);    // negated because active low
   int buttonHigh  =  digitalRead(button_Input);    //
@@ -299,7 +256,7 @@ void loop() {
   if( !remoteHigh & !buttonHigh & hotShoeHigh & (count == 0) ) oneShot();
   
   if( count == 0 & (remoteHigh | buttonHigh) ){
-     Serial.println("begin sequence");
+     if(serialDebug) Serial.println("begin sequence");
      shootSequence();
      //delay(500);
      coolDown(2);
@@ -314,18 +271,18 @@ void loop() {
 
 
 
-//Serial.print("remote: ");
-//Serial.println(remoteVal);
-//Serial.print("button: ");
-//Serial.println(buttonVal);
-//Serial.print("hotShoe: ");
-//Serial.println(hotShoeVal);
+//if(serialDebug) Serial.print("remote: ");
+//if(serialDebug) Serial.println(remoteVal);
+//if(serialDebug) Serial.print("button: ");
+//if(serialDebug) Serial.println(buttonVal);
+//if(serialDebug) Serial.print("hotShoe: ");
+//if(serialDebug) Serial.println(hotShoeVal);
 //delay(10);
 //if(!remoteVal) oneShot();
-//  Serial.println("remote Input: LOW");
+//  if(serialDebug) Serial.println("remote Input: LOW");
   //oneShot();
   //dipDelay(255,255,lightDuration);
-//}else Serial.println("button Input: LOW");
+//}else if(serialDebug) Serial.println("button Input: LOW");
 
 
 
