@@ -127,7 +127,7 @@ void dipDelay( int val, int val2, int delayTime){
 void setRing(int LEDstate){
    switch (LEDstate) {
     case 0:
-      //dipDelay(0,2,lightDuration);
+      dipDelay(0,2,lightDuration);
       // Useful to display alt light 1 for debugging
       //dipDelay(31,255,lightDuration);
       break;
