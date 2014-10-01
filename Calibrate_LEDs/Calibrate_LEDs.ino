@@ -18,15 +18,6 @@
 
 int serialDebug = 1;      //
 int lightDuration = 75;   //amount of time the light is on for in ms
-//int exposureLength = 190; //exposure length in ms - hopefully won't hardcode this in the end
-// T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
-// however we also add debouncing time in the main loop, so look out for that.
-
-// Ring Flash Mode
-// 1 => fire all of the lights on the first photo (total of 11 photos)
-// 0 => 1 LED per photo, 10 photos.
-int ringFlashFirst = 1;
-
 
 /////////////////////////
 //////Pin Declarations///
@@ -69,15 +60,14 @@ void setup() {
   //Zero everything so you don't have any lights stuck on.
  
   doubleShiftOut(0,0);
-
-  if(ringFlashFirst){
+  dipDelay(0,1,25);
+  
     count=0;
-  };
   
   
   digitalWrite(shutter_Release,LOW);
   
-  if(serialDebug) Serial.begin(9600);
+  Serial.begin(9600);
   //while (!Serial) {
   //  ; // wait for serial port to connect. Needed for Leonardo only
   //}
@@ -125,24 +115,17 @@ void dipDelay( int val, int val2, int delayTime){
 ///////////////////////////////////////////////////////
 
 void setRing(int LEDstate){
-  
-    switch (LEDstate) {
-     
+   switch (LEDstate) {
     case 0:
-      //dipDelay(0,2,lightDuration);
+      dipDelay(0,2,lightDuration);
       // Useful to display alt light 1 for debugging
       //dipDelay(31,255,lightDuration);
-      
-      dipDelay(32,0,lightDuration);
-      
       break;
     case 1:
-      dipDelay(0,1,lightDuration);
+      dipDelay(1,0,lightDuration);
       break;
     case 2:
-      //dipDelay(2,0,lightDuration);
-      dipDelay(64,0,lightDuration);
-      
+      dipDelay(2,0,lightDuration);
       break;
     case 3:
       dipDelay(4,0,lightDuration);
@@ -151,29 +134,19 @@ void setRing(int LEDstate){
       dipDelay(8,0,lightDuration);
       break;
     case 5:
-      //dipDelay(16,0,lightDuration);
-      dipDelay(0,2,lightDuration);
-      
+      dipDelay(16,0,lightDuration);
       break;
     case 6:
-      //dipDelay(32,0,lightDuration);
-      dipDelay(2,0,lightDuration);
-      
+      dipDelay(32,0,lightDuration);
       break;
     case 7:
-      //dipDelay(64,0,lightDuration);
-      dipDelay(128,0,lightDuration);
-      
+      dipDelay(64,0,lightDuration);
       break;
     case 8:
-      //dipDelay(128,0,lightDuration);
-      dipDelay(1,0,lightDuration);
-      
+      dipDelay(128,0,lightDuration);
       break;
     case 9:
-      //dipDelay(0,1,lightDuration);
-      dipDelay(16,0,lightDuration);
-      
+      dipDelay(0,1,lightDuration);
       break;
     case 10:
       dipDelay(255,255,lightDuration);
@@ -267,24 +240,47 @@ void coolDown(int secs){
 }
 
 void loop() {
-  
-  //if(serialDebug) Serial.println("State: Idle"); 
-  
-  int remoteHigh  = !digitalRead(remote_Input);    // negated because active low
-  int buttonHigh  =  digitalRead(button_Input);    //
-  int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
-  
-  //allow test shots 
-  if( !remoteHigh & !buttonHigh & hotShoeHigh & (count == 0) ) oneShot();
-  
-  if( count == 0 & (remoteHigh | buttonHigh) ){
-     if(serialDebug) Serial.println("begin sequence");
-     shootSequence();
-     //delay(500);
-     coolDown(2);
-     //count = 1;
-  } 
-  
+  //Serial.println("State: waiting");
+  //delay(500);  
+  while (Serial.available() > 0) {
+    //Serial.println("State: got something");
+    
+    //if(serialDebug) Serial.println("State: Idle"); 
+    int red = Serial.parseInt();
+    dipDelay(red,0,lightDuration);
+    delay(200);
+    dipDelay(red,0,lightDuration);
+    delay(200);
+    dipDelay(red,0,lightDuration);
+    delay(200);
+    dipDelay(red,0,lightDuration);
+    
+//    Serial.println(red);
+//    if (Serial.read() == '\n') {
+//       Serial.println("State: displaying");
+//       
+//       delay(500);
+//       dipDelay(0,red,lightDuration);
+//       delay(200);
+//       dipDelay(0,red,lightDuration);
+//       delay(200);
+//    }
+  };
+//  int remoteHigh  = !digitalRead(remote_Input);    // negated because active low
+//  int buttonHigh  =  digitalRead(button_Input);    //
+//  int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
+//  
+//  //allow test shots 
+//  if( !remoteHigh & !buttonHigh & hotShoeHigh & (count == 0) ) oneShot();
+//  
+//  if( count == 0 & (remoteHigh | buttonHigh) ){
+//     if(serialDebug) Serial.println("begin sequence");
+//     shootSequence();
+//     //delay(500);
+//     coolDown(2);
+//     //count = 1;
+//  } 
+//  
   
 
 }
