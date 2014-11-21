@@ -316,17 +316,25 @@ void loop() {
     int a = 255-brightness;
     int b = brightness;
     int c = brightness/2;
-    analogWrite(diagnostic_RLED,a);
-    analogWrite(diagnostic_BLED,b);
-    analogWrite(diagnostic_GLED, c);
+    analogWrite(diagnostic_RLED,255);
+    analogWrite(diagnostic_BLED,c);
+    analogWrite(diagnostic_GLED, a);
     
     brightness = brightness + fade;
     if (brightness == 0 || brightness == 255) {
       fade = -fade ; 
     }  
-    delay(30);
+    delay(300);
+    
+    
+    
     if (brightness  = 120){
       unsigned char i;
+      analogWrite(diagnostic_RLED,0);
+      analogWrite(diagnostic_BLED,255);
+      analogWrite(diagnostic_GLED,255);
+      delay(250);
+    
       for( i=0; i< numOfLEDs; i++){
         //pinMode(LEDPins[i],OUTPUT);
         digitalWrite(LEDPins[i], HIGH);
@@ -337,6 +345,10 @@ void loop() {
         //pinMode(LEDPins[i],OUTPUT);
         digitalWrite(LEDPins[i], LOW);
       };
+      analogWrite(diagnostic_RLED,255);
+      analogWrite(diagnostic_BLED,c);
+      analogWrite(diagnostic_GLED,a);
+      
       delay(3000);
     }
   }
