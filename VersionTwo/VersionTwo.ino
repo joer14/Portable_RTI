@@ -12,6 +12,11 @@
 // out of place thought:
 // consider using current over driving with PWM by PWM ~OE on the shift registers
 
+
+//TODO
+//Play with button code more and see if we need to solder it to +5V instead of ground...
+
+
 ///////////////////
 //////Options/////
 /////////////////
@@ -22,92 +27,84 @@ int lightDuration = 75;   //amount of time the light is on for in ms
 // T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
 // however we also add debouncing time in the main loop, so look out for that.
 
-// Ring Flash Mode
-// 1 => fire all of the lights on the first photo (total of 11 photos)
-// 0 => 1 LED per photo, 10 photos.
-int ringFlashFirst = 1;
-
 
 /////////////////////////
 //////Pin Declarations///
 /////////////////////////
 
-
-/////////////////////////////////
-
 ////Inputs////
-const int hotShoe_Input = A5;
-const int button_Input = A1;
 const int remote_Input = A0;  // input for the remote control (2.5mm jack)
+const int button_Input = A1;  // 
+const int hotShoe_Input = A5; // 3.5mm input on top that connects to PC-Sync Cable from Flash
 //////////////
 
-///Outputs////
-const int diagnostic_LED = 13;
+////Outputs////
 const int shutter_Release = 2;  // shutter release output (3.5mm to 2.5mm)
-/////////////
+const int diagnostic_GLED = 3; //Active Low
+const int diagnostic_RLED = 5; //Active Low
+const int diagnostic_BLED = 13; //Active Low
 
-///Some Global Variables////
+//High Power LEDs//
+
+//const int LED01 = A3;
+//const int LED02 = A4;
+//const int LED03 =  4;
+//const int LED04 =  6;
+//const int LED05 =  7;
+//const int LED06 =  8;
+//const int LED07 =  9;
+//const int LED08 =  10;
+//const int LED09 =  11;
+//const int LED10 =  12;
+
+unsigned char LEDPins[10] = {A3, A4, 4, 6, 7, 8,9,10,11,12}; 
+unsigned char numOfLEDs = 9;  //Indexed at 0
+
+//////////////////////////////
+//////Some Global Variables///
+//////////////////////////////
+
 int count = 1;
 int startIt = 0;
 
-
-
 void setup() {
+  
+  //Setup Inputs
   pinMode(hotShoe_Input, INPUT);
-  pinMode(diagnostic_LED, OUTPUT);
   pinMode(remote_Input, INPUT);
-  pinMode(shutter_Release, OUTPUT);
+  pinMode(button_Input, INPUT);
   
-  
-  pinMode(12,OUTPUT);
-  pinMode(11,OUTPUT);
-  pinMode(10,OUTPUT);
-  pinMode(9,OUTPUT);
-  pinMode(8,OUTPUT);
-  pinMode(7,OUTPUT);
-  pinMode(6,OUTPUT);
-  pinMode(5,OUTPUT);
-  pinMode(4,OUTPUT);
-  pinMode(3,OUTPUT);
-  digitalWrite(4,LOW);
+  //Pull up the remote and button
+  digitalWrite(remote_Input,HIGH);
+  digitalWrite(button_Input,HIGH);
   digitalWrite(hotShoe_Input,HIGH);
   
-  digitalWrite(remote_Input,HIGH);
+  //Status LED Outputs
+  pinMode(diagnostic_RLED, OUTPUT);
+  pinMode(diagnostic_RLED, OUTPUT);
+  pinMode(diagnostic_RLED, OUTPUT);
   
-  digitalWrite(button_Input,HIGH);
+  //Display Initially a Red LED
+  digitalWrite(diagnostic_RLED, LOW);
+  digitalWrite(diagnostic_RLED, HIGH);
+  digitalWrite(diagnostic_RLED, HIGH);
   
-  digitalWrite(diagnostic_LED, LOW);
-
-  //Zero everything so you don't have any lights stuck on.
- 
-  //doubleShiftOut(0,0);
-
-  if(ringFlashFirst){
-    count=0;
-  };
-  
-  
+  //Setup Shutter Release Output
+  pinMode(shutter_Release, OUTPUT);  
   digitalWrite(shutter_Release,LOW);
   
+  //Setup all the high powered LEDs as outputs and turn them off
+  unsigned char i;
+  for( i=0; i< numOfLEDs; i++){
+    pinMode(LEDPins[i],OUTPUT);
+    digitalWrite(LEDPins[i], LOW);
+  };
+  
   if(serialDebug) Serial.begin(9600);
-  //while (!Serial) {
-  //  ; // wait for serial port to connect. Needed for Leonardo only
-  //}
-
-
-// Test Shutter Release  
-//  delay(1000);
-//  digitalWrite(shutter_Release,HIGH);
-//  delay(1000);
-//  digitalWrite(shutter_Release,LOW);
-//   
+  
+  
+   
 }
-
-/////////////////////////////////////////////////
-////Shifts byte Values out to shift registers////
-/////////////////////////////////////////////////
-
-
 
 void dipDelay( int val, int val2, int delayTime){
   int upFrontDelay = 0;
@@ -129,63 +126,63 @@ void dipDelay( int val, int val2, int delayTime){
 
 void setRing(int LEDstate){
   
-    switch (LEDstate) {
-     
-    case 0:
-      //dipDelay(0,2,lightDuration);
-      // Useful to display alt light 1 for debugging
-      //dipDelay(31,255,lightDuration);
-      
-      //dipDelay(32,0,lightDuration);
-      digitalWrite(4,HIGH);
-      delay(75);
-      digitalWrite(4,LOW);
-      break;
-    case 1:
-      dipDelay(0,1,lightDuration);
-      break;
-    case 2:
-      //dipDelay(2,0,lightDuration);
-      dipDelay(64,0,lightDuration);
-      
-      break;
-    case 3:
-      dipDelay(4,0,lightDuration);
-      break;
-    case 4:
-      dipDelay(8,0,lightDuration);
-      break;
-    case 5:
-      //dipDelay(16,0,lightDuration);
-      dipDelay(0,2,lightDuration);
-      
-      break;
-    case 6:
-      //dipDelay(32,0,lightDuration);
-      dipDelay(2,0,lightDuration);
-      
-      break;
-    case 7:
-      //dipDelay(64,0,lightDuration);
-      dipDelay(128,0,lightDuration);
-      
-      break;
-    case 8:
-      //dipDelay(128,0,lightDuration);
-      dipDelay(1,0,lightDuration);
-      
-      break;
-    case 9:
-      //dipDelay(0,1,lightDuration);
-      dipDelay(16,0,lightDuration);
-      
-      break;
-    case 10:
-      dipDelay(255,255,lightDuration);
-      break;
-    default:
-      dipDelay(0,0,lightDuration);
-  };
+//    switch (LEDstate) {
+//     
+//    case 0:
+//      //dipDelay(0,2,lightDuration);
+//      // Useful to display alt light 1 for debugging
+//      //dipDelay(31,255,lightDuration);
+//      
+//      //dipDelay(32,0,lightDuration);
+//      digitalWrite(4,HIGH);
+//      delay(75);
+//      digitalWrite(4,LOW);
+//      break;
+//    case 1:
+//      dipDelay(0,1,lightDuration);
+//      break;
+//    case 2:
+//      //dipDelay(2,0,lightDuration);
+//      dipDelay(64,0,lightDuration);
+//      
+//      break;
+//    case 3:
+//      dipDelay(4,0,lightDuration);
+//      break;
+//    case 4:
+//      dipDelay(8,0,lightDuration);
+//      break;
+//    case 5:
+//      //dipDelay(16,0,lightDuration);
+//      dipDelay(0,2,lightDuration);
+//      
+//      break;
+//    case 6:
+//      //dipDelay(32,0,lightDuration);
+//      dipDelay(2,0,lightDuration);
+//      
+//      break;
+//    case 7:
+//      //dipDelay(64,0,lightDuration);
+//      dipDelay(128,0,lightDuration);
+//      
+//      break;
+//    case 8:
+//      //dipDelay(128,0,lightDuration);
+//      dipDelay(1,0,lightDuration);
+//      
+//      break;
+//    case 9:
+//      //dipDelay(0,1,lightDuration);
+//      dipDelay(16,0,lightDuration);
+//      
+//      break;
+//    case 10:
+//      dipDelay(255,255,lightDuration);
+//      break;
+//    default:
+//      dipDelay(0,0,lightDuration);
+//  };
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -272,24 +269,32 @@ void coolDown(int secs){
   int numFlashes = (secs*1000)/250;
   int i;
   for (i=0; i<numFlashes; i++){
-    digitalWrite(diagnostic_LED,HIGH);
+    //digitalWrite(diagnostic_LED,HIGH);
     delay(250);
-    digitalWrite(diagnostic_LED,LOW);
+    //digitalWrite(diagnostic_LED,LOW);
     delay(250);
   }
   
 }
 
+void testLED(){
+  if(serialDebug) Serial.println("State: Test LED");
+  delay(4000);
+}
+
 void loop() {
   
-  if(serialDebug) Serial.println("State: Idle"); 
-  delay(2);
+  if(serialDebug) {
+    Serial.println("State: Idle"); 
+    delay(20);
+  }
   int remoteHigh  = !digitalRead(remote_Input);    // negated because active low
   int buttonHigh  =  !digitalRead(button_Input);    //
   int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
   
   //allow test shots 
   if( !remoteHigh & !buttonHigh & hotShoeHigh & (count == 0) ) oneShot();
+  //if(buttonHigh) testLED();
   
   if( count == 0 & (remoteHigh | buttonHigh) ){
      if(serialDebug) Serial.println("begin sequence");
@@ -298,6 +303,43 @@ void loop() {
      coolDown(2);
      //count = 1;
   } 
+  
+  int fade =5;
+  int brightness = 0;
+    
+  while(1){
+    
+//    analogWrite(diagnostic_RLED,255-fade);
+//    analogWrite(diagnostic_BLED,fade);
+//    analogWrite(diagnostic_GLED,fade/2);
+//   
+    int a = 255-brightness;
+    int b = brightness;
+    int c = brightness/2;
+    analogWrite(diagnostic_RLED,a);
+    analogWrite(diagnostic_BLED,b);
+    analogWrite(diagnostic_GLED, c);
+    
+    brightness = brightness + fade;
+    if (brightness == 0 || brightness == 255) {
+      fade = -fade ; 
+    }  
+    delay(30);
+    if (brightness  = 120){
+      unsigned char i;
+      for( i=0; i< numOfLEDs; i++){
+        //pinMode(LEDPins[i],OUTPUT);
+        digitalWrite(LEDPins[i], HIGH);
+      };
+      //digitalWrite(4,HIGH);
+      delay(50);
+      for( i=0; i< numOfLEDs; i++){
+        //pinMode(LEDPins[i],OUTPUT);
+        digitalWrite(LEDPins[i], LOW);
+      };
+      delay(3000);
+    }
+  }
   
   
 
