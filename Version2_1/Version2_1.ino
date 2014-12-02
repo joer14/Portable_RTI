@@ -14,15 +14,24 @@
 
 
 //TODO
-//Play with button code more and see if we need to solder it to +5V instead of ground...
+//  Play with button code more and see if we need to solder it to +5V instead of ground...
+//  fix extra shot at end
+//  clean up code
+//  change some vars to #defines
+//  add LED status - make a function to make this easier?
+    //  green is ready to shoot
+    //  blue is shooting actively
+    //  red alt blue is cooling down
 
+//  fix button, add functionality to it?
+//    maybe shoot and entire sequence or door a cool pattern 
 
 ///////////////////
 //////Options/////
 /////////////////
 
 int serialDebug = 1;      //
-int lightDuration = 75;   //amount of time the light is on for in ms
+int lightDuration = 50;   //amount of time the light is on for in ms
 //int exposureLength = 190; //exposure length in ms - hopefully won't hardcode this in the end
 // T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
 // however we also add debouncing time in the main loop, so look out for that.
@@ -128,74 +137,26 @@ void setRing(int LEDstate){
    unsigned char i;
    if (LEDstate < 10){
         digitalWrite(LEDPins[LEDstate], HIGH);
-        delay(75);
+        delay(lightDuration);
         digitalWrite(LEDPins[LEDstate], LOW);
-   }else {
+   }else if(LEDstate == 10) {
      for( i=0; i< numOfLEDs; i++){
        digitalWrite(LEDPins[i], HIGH);
       };
-      delay(75);
+      delay(lightDuration);
    for( i=0; i< numOfLEDs; i++){
      digitalWrite(LEDPins[i], LOW);
       };
    };
-//    switch (LEDstate) {
-//     
-//    case 0:
-//      //dipDelay(0,2,lightDuration);
-//      // Useful to display alt light 1 for debugging
-//      //dipDelay(31,255,lightDuration);
-//      
-//      //dipDelay(32,0,lightDuration);
-//      digitalWrite(4,HIGH);
-//      delay(75);
-//      digitalWrite(4,LOW);
-//      break;
-//    case 1:
-//      dipDelay(0,1,lightDuration);
-//      break;
-//    case 2:
-//      //dipDelay(2,0,lightDuration);
-//      dipDelay(64,0,lightDuration);
-//      
-//      break;
-//    case 3:
-//      dipDelay(4,0,lightDuration);
-//      break;
-//    case 4:
-//      dipDelay(8,0,lightDuration);
-//      break;
-//    case 5:
-//      //dipDelay(16,0,lightDuration);
-//      dipDelay(0,2,lightDuration);
-//      
-//      break;
-//    case 6:
-//      //dipDelay(32,0,lightDuration);
-//      dipDelay(2,0,lightDuration);
-//      
-//      break;
-//    case 7:
-//      //dipDelay(64,0,lightDuration);
-//      dipDelay(128,0,lightDuration);
-//      
-//      break;
-//    case 8:
-//      //dipDelay(128,0,lightDuration);
-//      dipDelay(1,0,lightDuration);
-//      
-//      break;
-//    case 9:
-//      //dipDelay(0,1,lightDuration);
-//      dipDelay(16,0,lightDuration);
-//      
-//      break;
-//    case 10:
-//      dipDelay(255,255,lightDuration);
-//      break;
-//    default:
-//      dipDelay(0,0,lightDuration);
-//  };
+};
+
+void setDiagnosticLED(int R, int G, int B){
+  int compR = 255 - R;
+  int compG = 255 - G;
+  int compB = 255 - B;
+  analogWrite(diagnostic_RLED,compR);
+  analogWrite(diagnostic_GLED,compG);
+  analogWrite(diagnostic_BLED,compB);
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -293,6 +254,15 @@ void loop() {
     //Serial.println("State: Idle"); 
     //delay(50);
   }
+  while(1){
+    setDiagnosticLED(255,0,0);
+    delay(1000);
+    setDiagnosticLED(0,255,0);
+    delay(1000);
+    setDiagnosticLED(0,0,255);
+    delay(1000);
+  
+  };
   int remoteHigh  = !digitalRead(remote_Input);    // negated because active low
   int buttonHigh  =  !digitalRead(button_Input);    //
   int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
