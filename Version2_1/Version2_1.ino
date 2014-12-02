@@ -24,14 +24,18 @@
     //  red alt blue is cooling down
 
 //  fix button, add functionality to it?
-//    maybe shoot and entire sequence or door a cool pattern 
+    //    maybe shoot and entire sequence or door a cool pattern 
+//  tape down / reenforce stuff
+//  check LED order
+//  create and use header files like a library
+
 
 ///////////////////
 //////Options/////
 /////////////////
 
 int serialDebug = 1;      //
-int lightDuration = 50;   //amount of time the light is on for in ms
+int lightDuration = 20;   //amount of time the light is on for in ms
 //int exposureLength = 190; //exposure length in ms - hopefully won't hardcode this in the end
 // T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
 // however we also add debouncing time in the main loop, so look out for that.
@@ -53,20 +57,10 @@ const int diagnostic_GLED = 3; //Active Low
 const int diagnostic_RLED = 5; //Active Low
 const int diagnostic_BLED = 13; //Active Low
 
-//High Power LEDs//
+////Pin assignments for each LED////
+//unsigned char LEDPins[10] = {A3, 4,11,10,7, 6,9, 8,12, A4}; 
 
-//const int LED01 = A3;
-//const int LED02 = A4;
-//const int LED03 =  4;
-//const int LED04 =  6;
-//const int LED05 =  7;
-//const int LED06 =  8;
-//const int LED07 =  9;
-//const int LED08 =  10;
-//const int LED09 =  11;
-//const int LED10 =  12;
-
-unsigned char LEDPins[10] = {A3, A4, 4, 6, 7, 8,9,10,11,12}; 
+unsigned char LEDPins[10] = {A3, 6,7,8,12,11,10,9,A4,4}; 
 unsigned char numOfLEDs = 10;  //Indexed at 0
 
 //////////////////////////////
@@ -166,6 +160,7 @@ void setDiagnosticLED(int R, int G, int B){
 void oneShot(){
   if(serialDebug) Serial.println("State: One Shot"); 
   setRing(10);
+  
   //delay(2000);// just for debugging
 }
 ///////////////////
@@ -205,8 +200,10 @@ void shootSequence(){
     previous = millis();
     int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
     while(!hotShoeHigh){
-      hotShoeHigh = !digitalRead(hotShoe_Input); 
+      hotShoeHigh = !digitalRead(hotShoe_Input);
+      setDiagnosticLED(0,128,128); 
     }
+    setDiagnosticLED(0,0,128);
     setRing(count);
     now = millis();
     Xn1 = now - previous;
@@ -219,14 +216,12 @@ void shootSequence(){
     //if (count==(cases)) digitalWrite(shutter_Release,LOW);
     if(serialDebug) Serial.println(Xn1);
   }
-  
- 
   count=0;
 }
 
 
 /////////////////////////////////////////////////////////////////////
-////////////  Blinks the Diagnostic LED for 2 seconds //////////////
+////////////  Blinks the Diagnostic LED for secs seconds //////////////
 /////////////////////////////////////////////////////////////////////
 
 void coolDown(int secs){
@@ -235,34 +230,41 @@ void coolDown(int secs){
   int numFlashes = (secs*1000)/250;
   int i;
   for (i=0; i<numFlashes; i++){
-    //digitalWrite(diagnostic_LED,HIGH);
+    setDiagnosticLED(255,0,0);
     delay(250);
-    //digitalWrite(diagnostic_LED,LOW);
+    setDiagnosticLED(0,0,255);
     delay(250);
   }
   
 }
 
-void testLED(){
-  if(serialDebug) Serial.println("State: Test LED");
-  delay(4000);
-}
 
+//1,2,
 void loop() {
   
   if(serialDebug) {
     //Serial.println("State: Idle"); 
     //delay(50);
   }
-  while(1){
-    setDiagnosticLED(255,0,0);
-    delay(1000);
-    setDiagnosticLED(0,255,0);
-    delay(1000);
-    setDiagnosticLED(0,0,255);
-    delay(1000);
   
-  };
+  while(1){
+    char i;
+    for (i=0; i<10; i++){
+     Serial.println(LEDPins[i]);
+     digitalWrite(LEDPins[i], HIGH);
+     delay(5);
+     digitalWrite(LEDPins[i], LOW);
+     delay(700);
+     digitalWrite(LEDPins[i], HIGH);
+     delay(5);
+     digitalWrite(LEDPins[i], LOW);
+     delay(500);
+    }  
+  }
+  
+  
+  setDiagnosticLED(0,128,0); //Set it green for Go
+  
   int remoteHigh  = !digitalRead(remote_Input);    // negated because active low
   int buttonHigh  =  !digitalRead(button_Input);    //
   int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
@@ -274,69 +276,9 @@ void loop() {
   if( count == 0 & (remoteHigh | buttonHigh) ){
      if(serialDebug) Serial.println("begin sequence");
      shootSequence();
-     //delay(500);
      coolDown(2);
-     //count = 1;
   } 
   
-  int fade =5;
-  int brightness = 0;
-    
-//  while(1){
-//      unsigned char i;
-//      for( i=0; i< numOfLEDs; i++){
-//        Serial.println(LEDPins[i]);
-//        digitalWrite(LEDPins[i], HIGH);
-//        delay(50);
-//        digitalWrite(LEDPins[i], LOW);
-//        delay(2000);  
-//    };
-//    analogWrite(diagnostic_RLED,255-fade);
-//    analogWrite(diagnostic_BLED,fade);
-//    analogWrite(diagnostic_GLED,fade/2);
-//   
-//    int a = 255-brightness;
-//    int b = brightness;
-//    int c = brightness/2;
-//    analogWrite(diagnostic_RLED,255);
-//    analogWrite(diagnostic_BLED,c);
-//    analogWrite(diagnostic_GLED, a);
-//    
-//    brightness = brightness + fade;
-//    if (brightness == 0 || brightness == 255) {
-//      fade = -fade ; 
-//    }  
-//    delay(300);
-//    
-//    
-//    
-//    if (brightness  = 120){
-//      unsigned char i;
-//      analogWrite(diagnostic_RLED,0);
-//      analogWrite(diagnostic_BLED,255);
-//      analogWrite(diagnostic_GLED,255);
-//      delay(250);
-//    
-//      for( i=0; i< numOfLEDs; i++){
-//        //pinMode(LEDPins[i],OUTPUT);
-//        digitalWrite(LEDPins[i], HIGH);
-//      };
-//      //digitalWrite(4,HIGH);
-//      delay(50);
-//      for( i=0; i< numOfLEDs; i++){
-//        //pinMode(LEDPins[i],OUTPUT);
-//        digitalWrite(LEDPins[i], LOW);
-//      };
-//      analogWrite(diagnostic_RLED,255);
-//      analogWrite(diagnostic_BLED,c);
-//      analogWrite(diagnostic_GLED,a);
-//      
-//      delay(3000);
-//    }
-// nbh  }
-  
-  
-
 }
 
 
