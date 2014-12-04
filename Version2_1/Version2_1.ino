@@ -35,7 +35,7 @@
 /////////////////
 
 int serialDebug = 1;      //
-int lightDuration = 20;   //amount of time the light is on for in ms
+int lightDuration = 75  ;   //amount of time the light is on for in ms
 //int exposureLength = 190; //exposure length in ms - hopefully won't hardcode this in the end
 // T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
 // however we also add debouncing time in the main loop, so look out for that.
@@ -46,8 +46,8 @@ int lightDuration = 20;   //amount of time the light is on for in ms
 /////////////////////////
 
 ////Inputs////
-const int remote_Input = A0;  // input for the remote control (2.5mm jack)
-const int button_Input = A1;  // 
+const int remote_Input = A1;  // input for the remote control (2.5mm jack)
+const int button_Input = A0;  // 
 const int hotShoe_Input = A5; // 3.5mm input on top that connects to PC-Sync Cable from Flash
 //////////////
 
@@ -69,6 +69,15 @@ unsigned char numOfLEDs = 10;  //Indexed at 0
 
 int count = 1;
 int startIt = 0;
+
+void setDiagnosticLED(int R, int G, int B){
+  int compR = 255 - R;
+  int compG = 255 - G;
+  int compB = 255 - B;
+  analogWrite(diagnostic_RLED,compR);
+  analogWrite(diagnostic_GLED,compG);
+  analogWrite(diagnostic_BLED,compB);
+};
 
 void setup() {
   
@@ -104,8 +113,8 @@ void setup() {
   };
   
   if(serialDebug) Serial.begin(9600);
-  
-  
+  setDiagnosticLED(255,0,0);
+  delay(2000);
    
 }
 
@@ -144,14 +153,6 @@ void setRing(int LEDstate){
    };
 };
 
-void setDiagnosticLED(int R, int G, int B){
-  int compR = 255 - R;
-  int compG = 255 - G;
-  int compB = 255 - B;
-  analogWrite(diagnostic_RLED,compR);
-  analogWrite(diagnostic_GLED,compG);
-  analogWrite(diagnostic_BLED,compB);
-};
 
 /////////////////////////////////////////////////////////////////////
 ///// Called when the user hits the shutter button on the camera 
@@ -246,35 +247,56 @@ void loop() {
     //Serial.println("State: Idle"); 
     //delay(50);
   }
-  
-  while(1){
-    char i;
-    for (i=0; i<10; i++){
-     Serial.println(LEDPins[i]);
-     digitalWrite(LEDPins[i], HIGH);
-     delay(5);
-     digitalWrite(LEDPins[i], LOW);
-     delay(700);
-     digitalWrite(LEDPins[i], HIGH);
-     delay(5);
-     digitalWrite(LEDPins[i], LOW);
-     delay(500);
-    }  
-  }
-  
+
+
+//  test sequence for calibrating LEDs  
+//  while(1){
+//    char i;
+//    for (i=0; i<10; i++){
+//     Serial.println(LEDPins[i]);
+//     digitalWrite(LEDPins[i], HIGH);
+//     delay(5);
+//     digitalWrite(LEDPins[i], LOW);
+//     delay(700);
+//     digitalWrite(LEDPins[i], HIGH);
+//     delay(5);
+//     digitalWrite(LEDPins[i], LOW);
+//     delay(500);
+//    }  
+//  }
   
   setDiagnosticLED(0,128,0); //Set it green for Go
   
   int remoteHigh  = !digitalRead(remote_Input);    // negated because active low
-  int buttonHigh  =  !digitalRead(button_Input);    //
+  int buttonHigh  = !digitalRead(button_Input);    //
   int hotShoeHigh = !digitalRead(hotShoe_Input);   // negated because active low
+  //int buttonHigh = 0;
+//  while(1){
+//    buttonHigh  = digitalRead(button_Input); 
+//    Serial.println(buttonHigh);
+//    delay(50);
+//  }
+  
   count=0;
   //allow test shots 
   if( !remoteHigh & !buttonHigh & hotShoeHigh & (count == 0) ) oneShot();
-  //if(buttonHigh) testLED();
+//  while(1){
+//    buttonHigh  = !digitalRead(button_Input);
+//    remoteHigh  = !digitalRead(remote_Input);    // negated because active low
+//  
+//  if(buttonHigh) {
+//    Serial.println("button high");
+//    delay(50);
+//   };
+//   if(remoteHigh) {
+//    Serial.println("remote high");
+//    delay(50);
+//   };
+//  }
   
   if( count == 0 & (remoteHigh | buttonHigh) ){
      if(serialDebug) Serial.println("begin sequence");
+     //Serial.println(buttonInput)
      shootSequence();
      coolDown(2);
   } 
