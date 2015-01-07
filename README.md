@@ -1,7 +1,7 @@
-Portable_RTI
+RELight
 ============
-
-Code and Documentation for the RELighta, a portable RTI.
+Aug 2014 - Spring 2015
+Code and Documentation for the RELight, a portable RTI.
 
 Email me at joer14@gmail.com with any questions, comments, thoughts :)  
 * Photos of the original prototype and some background info: [Photos](https://imgur.com/a/AzWaE)  
