@@ -12,6 +12,7 @@
 // out of place thought:
 // consider using current over driving with PWM by PWM ~OE on the shift registers
 
+// write power managment code - keep track of 
 
 //TODO
 //  Play with button code more and see if we need to solder it to +5V instead of ground...
@@ -35,7 +36,10 @@
 /////////////////
 
 int serialDebug = 1;      //
-int lightDuration = 75  ;   //amount of time the light is on for in ms
+int oneShotCount = 1;
+int lightDuration = 50  ;   //amount of time the light is on for in ms
+      // don't make it greater than 50 or else the device outputs smoke.
+
 //int exposureLength = 190; //exposure length in ms - hopefully won't hardcode this in the end
 // T3i shoots at 5FPS, so a little less than 200ms is the max time in theory for that camera
 // however we also add debouncing time in the main loop, so look out for that.
@@ -146,7 +150,8 @@ void setRing(int LEDstate){
      for( i=0; i< numOfLEDs; i++){
        digitalWrite(LEDPins[i], HIGH);
       };
-      delay(lightDuration);
+      //delay(lightDuration);
+      delay(25);
    for( i=0; i< numOfLEDs; i++){
      digitalWrite(LEDPins[i], LOW);
       };
@@ -160,7 +165,9 @@ void setRing(int LEDstate){
 /////////////////////////////////////////////////////////////////////
 void oneShot(){
   if(serialDebug) Serial.println("State: One Shot"); 
-  setRing(10);
+  setRing(oneShotCount);
+  oneShotCount = oneShotCount++;
+  if (oneShotCount>10) oneShotCount=1;
   
   //delay(2000);// just for debugging
 }
@@ -298,7 +305,7 @@ void loop() {
      if(serialDebug) Serial.println("begin sequence");
      //Serial.println(buttonInput)
      shootSequence();
-     coolDown(2);
+     coolDown(3);
   } 
   
 }
