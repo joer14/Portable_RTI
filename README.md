@@ -1,6 +1,6 @@
 RELight
 ============
-Aug 2014 - Spring 2015
+Aug 2014 - Spring 2015  
 Code and Documentation for the RELight, a portable RTI.
 
 Email me at joer14@gmail.com with any questions, comments, thoughts :)  
