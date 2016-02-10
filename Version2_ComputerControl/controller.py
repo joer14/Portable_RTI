@@ -1,3 +1,19 @@
+# how this code works
+# 1. ensure you have the correct com port
+# 	- you can find this in device manager
+# 2. this program can be passed arguments (either 1 or 2)
+# 	- 1 is for sequence and 2 for is for camera to shoot a picture
+# 	- so if you run C:\Python27\python.exe controller.py 1
+# 		the camera will shoot a sequence of photos, 1 flash at 
+# 		a time, and then all flashes and then just ambient.
+# 	# - if you run at 
+# 3. the program also runs in interactive mode, so you can 
+#  	trigger one mode or the other and it exits
+# 4. The program will only exit after it reads in 2 lines
+#	from the serial port. This is so that you can run the
+# 	script within another script in a single thread, and have
+#	the next step execute in a serial fashion. 
+
 import serial
 import time
 import sys
