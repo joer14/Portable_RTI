@@ -254,6 +254,10 @@ void loop() {
     dipDelay(red,0,lightDuration);
     delay(200);
     dipDelay(red,0,lightDuration);
+    delay(2000);
+    oneShot();
+    delay(3000);
+    oneShot();
     
 //    Serial.println(red);
 //    if (Serial.read() == '\n') {

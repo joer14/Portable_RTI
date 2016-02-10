@@ -118,8 +118,16 @@ void setup() {
   
   if(serialDebug) Serial.begin(9600);
   setDiagnosticLED(255,0,0);
-  delay(2000);
-   
+//  delay(500);
+//  setDiagnosticLED(0,0,0);
+//  oneShot();
+//  delay(500);
+//  setDiagnosticLED(255,0,0);
+//  delay(500);
+//  setDiagnosticLED(0,0,0);
+//  oneShot();
+//  delay(500);
+//  setDiagnosticLED(255,0,0);
 }
 
 void dipDelay( int val, int val2, int delayTime){
@@ -168,8 +176,12 @@ void oneShot(){
   setRing(oneShotCount);
   oneShotCount = oneShotCount++;
   if (oneShotCount>10) oneShotCount=1;
-  
-  //delay(2000);// just for debugging
+//  setDiagnosticLED(0,128,128); 
+//  delay(500);
+//  setDiagnosticLED(0,0,0);
+//  delay(500);
+//  setDiagnosticLED(0,128,128); 
+//  delay(2000);// just for debugging
 }
 ///////////////////
 // **** theory ****
@@ -181,7 +193,7 @@ void oneShot(){
 
 
 void shootSequence(){
-  //if(serialDebug) Serial.println("State: Shooting Sequence");
+  if(serialDebug) Serial.println("State: Shooting Sequence");
   //delay(500);
   //int cases = 11;
   //Set cases to 12 to have a dead state at the end for no LED exposure
@@ -219,10 +231,14 @@ void shootSequence(){
     //stopShutterTime = (10.5*CMA) + initialTime; // when should the sequency be done shooting
     stopShutterTime = ((cases-.5)*CMA) + initialTime; // when should the sequency be done shooting
   
-    count = count++;
+    count = count + 1;
     if ( now > stopShutterTime) digitalWrite(shutter_Release,LOW);
     //if (count==(cases)) digitalWrite(shutter_Release,LOW);
-    if(serialDebug) Serial.println(Xn1);
+    if(serialDebug) {
+    
+      Serial.println(Xn1);
+      Serial.println(count);
+    }
   }
   count=0;
 }
