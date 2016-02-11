@@ -7,8 +7,13 @@ Materials:
 	- no shift registers, we just use all of the IO pins. 
 
 Power:
-- it must be powered by 2 sources at least. USB + wall adapter or wall adapter + battery. 
+- it must be powered by 2 sources at least. USB + wall adapter or wall adapter + battery. Power should be around 12v, 2 or 3A if using external wall adapter. 
+- battery is Sony NP-F770 Battery 
 
+
+Connecting everything:
+- the cords should be color coded with electrical tape, but if they are not:
+	- the top 3.5mm hole is for hotshoe, the side 2.5mm is for the remote, the side 3.5mm for is for a 3.5mm->2.5mm cable that connects to the camera's shutter release. 
 
 Source Code:
 

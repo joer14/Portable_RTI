@@ -1,9 +1,10 @@
-RELight
-============
-Aug 2014 - Spring 2015  
-Code and Documentation for the RELight, a portable RTI.
+Original Version 1
 
-Email me at joer14@gmail.com with any questions, comments, thoughts :)  
-* Photos of the original prototype and some background info: [Photos](https://imgur.com/a/AzWaE)  
-* Info about the PCB design can be found in the [wiki.](https://github.com/joer14/Portable_RTI/wiki)  
-* Informal notes can be found on my [blog.](http://joerowley.tumblr.com/tagged/relight)
+- uses
+	- 12v cree LEDs and step-up regulator. 
+	- body is a from F & V Lighting R-300 LED Ring Light with L-Bracket
+	- battery is Sony NP-F770 Battery
+
+Code
+- there are few repos in here. I believe the current working code is 
+	in RELight_Refactor. 
